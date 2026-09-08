@@ -20,9 +20,26 @@ database_channel = os.environ["MUSIC_DATABASE_ID"]
 bot = telebot.TeleBot(bot_api)
 async_bot = AsyncTeleBot(bot_api, parse_mode="Markdown", disable_web_page_preview=True)
 
+# deployment-facing branding/config; override in .env for self-hosting
+bot_name = os.environ.get("BOT_NAME", "Spot Seek Bot")
+bot_username = os.environ.get("BOT_USERNAME", "@SpotSeekBot")
+developer_channel_username = os.environ.get("DEVELOPER_CHANNEL_USERNAME", "@Arashnm80_Channel")
+developer_channel_link = f"https://t.me/{developer_channel_username.lstrip('@')}"
+developer_github_url = os.environ.get("DEVELOPER_GITHUB_URL", "https://github.com/arashnm80/spot-seek-bot")
+developer_youtube_url = os.environ.get("DEVELOPER_YOUTUBE_URL", "https://www.youtube.com/@Arashnm80")
+instagram_downloader_bot_username = os.environ.get(
+    "INSTAGRAM_DOWNLOADER_BOT_USERNAME",
+    "@Best_Instagram_downloader_bot",
+)
+success_message_sponsor = os.environ.get("SUCCESS_MESSAGE_SPONSOR", "@DiamondAccountStore")
+webhook_host = os.environ.get("WEBHOOK_HOST", "https://spotseek.arashnm80.ir")
+promote_channel_username = os.environ.get(
+    "PROMOTE_CHANNEL_USERNAME",
+    developer_channel_username,
+)
+promote_channel_link = f"https://t.me/{promote_channel_username.lstrip('@')}"
+
 # bot name
-bot_name = "Spot Seek Bot"
-bot_username = "@SpotSeekBot"
 
 # todo: isn't best practice and can be optimized later.
 # to keep track of last query and debounce fast changes while user is still typing
@@ -31,7 +48,7 @@ last_queries = {}
 last_chat_searches = {}
 
 # message for /start command
-welcome_message = '''Hi😃👋
+welcome_message = f'''Hi😃👋
 
 You can search for a song or album by typing its name. for example try this:
 `Adele - Someone Like You`
@@ -48,22 +65,22 @@ https://open.spotify.com/playlist/3ceLS7hutXrwz03g0c11gW
 
 
 You can also search for songs in other chats, groups or channels by using the inline mode of the bot. for example type this in some other chat:
-`@SpotSeekBot Adele - Someone Like You`
+`{bot_username} Adele - Someone Like You`
 
 (In inline mode you write bot's username and type a song name after a space)
 '''
 
 # message for /info command
-info_message = '''This bot's whole open source is available in my github and all interested programmers are welcome to contribute and improve it.
+info_message = f'''This bot's whole open source is available in my github and all interested programmers are welcome to contribute and improve it.
 
 Developer's telegram channel:
-[https://t.me/Arashnm80_Channel](https://t.me/Arashnm80_Channel)
+[{developer_channel_link}]({developer_channel_link})
 
 Note: albums are downloaded faster than playlists and tracks are downloaded faster than albums.
 
 You can support and motivate me to buy more servers for faster download by:
-• Giving a star in [github](https://github.com/arashnm80/spot-seek-bot)⭐🙂
-• Or subscribing to [my youtube](https://www.youtube.com/@Arashnm80)🔥❤️'''
+• Giving a star in [github]({developer_github_url})⭐🙂
+• Or subscribing to [my youtube]({developer_youtube_url})🔥❤️'''
 
 # message for /privacy command
 privacy_message = '''• This bot doesn't gather any info from the users
@@ -77,10 +94,10 @@ soundcloud_link_message = '''This bot is for downloading from spotify but you se
 Send the link of your track/album/playlist from spotify'''
 youtube_link_message = '''This bot is for downloading from spotify but you sent a youtube link.
 Send the link of your track/album/playlist from spotify'''
-instagram_link_message = '''This bot is for downloading from spotify but you sent an instagram link.
+instagram_link_message = f'''This bot is for downloading from spotify but you sent an instagram link.
 Send the link of your track/album/playlist from spotify
 
-Or use my [instagram downloader](https://t.me/Best_Instagram_downloader_bot) for this link.'''
+Or use my [instagram downloader](https://t.me/{instagram_downloader_bot_username.lstrip('@')}) for this link.'''
 spotify_episode_link_message = '''You can't send podcast episode links.
 Send the link of your track/album/playlist from spotify'''
 spotify_artist_link_message = '''You can't send artist links.
@@ -91,7 +108,7 @@ Send the link of your track/album/playlist from spotify'''
 
 # successfull_end_message = '''Me:\n[Youtube](https://www.youtube.com/@Arashnm80) • [𝕏](https://x.com/Arashnm80) • [Github](https://github.com/arashnm80)'''
 # successfull_end_message = '''end✅\n\nbot username might change. check @Arashnm80\\_Channel for the latest news.'''
-successfull_end_message = '''end✅\nsponsor: @DiamondAccountStore'''
+successfull_end_message = f'''end✅\nsponsor: {success_message_sponsor}'''
 
 # successfull_end_message = '''If you liked the bot you can support me by giving a star [here](https://github.com/arashnm80/spot-seek-bot)⭐ (it's free)
 
@@ -173,9 +190,6 @@ warp_session.proxies.update(warp_proxies)
 proxychains4_config_file = "/etc/proxychains4.conf" # from x-ui panel
 # proxychains4_config_file = "/etc/proxychains4-oblivion-warp.conf" # from bepass-org
 
-# promote channel
-promote_channel_username = "@Arashnm80_Channel"
-promote_channel_link = f"https://t.me/{promote_channel_username.lstrip('@')}"
 # Ask to join the promo channel only after this many fully successful
 # link requests in a row (all tracks already in the database and sent).
 promote_channel_join_after_successes = 5
@@ -277,7 +291,7 @@ sftp_username = os.environ["SFTP_USERNAME"]
 sftp_password = os.environ["SFTP_PASSWORD"]
 
 # webhook
-WEBHOOK_HOST = "https://spotseek.arashnm80.ir"  # your domain
+WEBHOOK_HOST = webhook_host  # your domain
 # WEBHOOK_PATH = f"/bot{bot_api}"  # unique path (avoid collisions)
 WEBHOOK_PATH = f"/bot"
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
