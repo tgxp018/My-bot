@@ -6,13 +6,37 @@ rm -rf /root/.spotdl
 # Define the script name
 SCRIPT_NAME="spotseek_queue_handler.py"
 
-# Find and kill the running process
-echo "Finding and killing the existing process..."
-PID=$(pgrep -f "$SCRIPT_NAME")
+group_has_live_processes() {
+    ps -o stat= -g "$1" 2>/dev/null | grep -qv '^[[:space:]]*Z'
+}
 
-if [ -n "$PID" ]; then
-    echo "Killing process with PID $PID..."
-    kill -9 "$PID"
+# Find and stop the running process group so spotdl/proxychains children exit too
+echo "Finding and stopping the existing process..."
+mapfile -t PIDS < <(pgrep -f "$SCRIPT_NAME")
+
+if [ "${#PIDS[@]}" -gt 0 ]; then
+    for PID in "${PIDS[@]}"; do
+        PGID=$(ps -o pgid= -p "$PID" | tr -d ' ')
+        if [ -z "$PGID" ]; then
+            echo "Could not determine process group for PID $PID, skipping."
+            continue
+        fi
+
+        echo "Stopping process group $PGID (leader PID $PID)..."
+        kill -TERM -- "-$PGID" 2>/dev/null || true
+
+        for _ in {1..10}; do
+            if ! group_has_live_processes "$PGID"; then
+                break
+            fi
+            sleep 1
+        done
+
+        if group_has_live_processes "$PGID"; then
+            echo "Force killing process group $PGID..."
+            kill -KILL -- "-$PGID" 2>/dev/null || true
+        fi
+    done
 else
     echo "No running process found."
 fi
@@ -36,7 +60,7 @@ unset SPOT_SEEK_BOT_API MUSIC_DATABASE_ID LOG_CHANNEL_ID SPOTIFY_APPS_LIST
 # Activate the virtual environment
 source "$SCRIPT_DIR/venv/bin/activate"
 
-# Run the Python script using the virtual environment's Python interpreter
-nohup python3 "$SCRIPT_NAME" > /dev/null 2>&1 &
+# Run the Python script in its own session so future restarts can stop all children
+nohup setsid python3 "$SCRIPT_NAME" > /dev/null 2>&1 &
 
 echo "$SCRIPT_NAME restarted successfully."

@@ -97,7 +97,7 @@ add this text to crontab (change with the path you've cloned repository):
 - [x] manage too threads bug
 - [x] ~regex should handle both http and https~
 - [x] make `restart_spotseek.sh` work without reboot too
-- [ ] restarting queue handler doesn't stop previous spotdl download so there might be an excessive mp3 file that might lead to creating wrong track
+- [x] ~restarting queue handler doesn't stop previous spotdl download so there might be an excessive mp3 file that might lead to creating wrong track~
 - [ ] add gif tutorial for bot in the start
 - [ ] check out `zotify` capabilities
 - [ ] lyrics
