@@ -65,7 +65,7 @@ export PATH="$SCRIPT_DIR/.venv/bin:/root/.deno/bin:$PATH"
 unset SPOT_SEEK_BOT_API MUSIC_DATABASE_ID LOG_CHANNEL_ID SPOTIFY_APPS_LIST
 
 # Activate the virtual environment
-source "$SCRIPT_DIR/venv/bin/activate"
+source "$SCRIPT_DIR/.venv/bin/activate"
 
 # Run uvicorn in the background using the virtual environment's Python (new process group)
 nohup setsid python3 -m uvicorn "$APP_MODULE" --host "$HOST" --port "$PORT" > /dev/null 2>&1 &

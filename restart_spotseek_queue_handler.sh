@@ -34,7 +34,7 @@ cd "$SCRIPT_DIR"
 unset SPOT_SEEK_BOT_API MUSIC_DATABASE_ID LOG_CHANNEL_ID SPOTIFY_APPS_LIST
 
 # Activate the virtual environment
-source "$SCRIPT_DIR/venv/bin/activate"
+source "$SCRIPT_DIR/.venv/bin/activate"
 
 # Run the Python script using the virtual environment's Python interpreter
 nohup python3 "$SCRIPT_NAME" > /dev/null 2>&1 &
