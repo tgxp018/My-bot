@@ -38,6 +38,7 @@ promote_channel_username = os.environ.get(
     developer_channel_username,
 )
 promote_channel_link = f"https://t.me/{promote_channel_username.lstrip('@')}"
+bot_mode = os.environ.get("BOT_MODE", "webhook").strip().lower()
 
 # bot name
 
@@ -295,4 +296,4 @@ WEBHOOK_HOST = webhook_host  # your domain
 # WEBHOOK_PATH = f"/bot{bot_api}"  # unique path (avoid collisions)
 WEBHOOK_PATH = f"/bot"
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
-WEBHOOK_SECRET_TOKEN = os.environ["WEBHOOK_SECRET_TOKEN"]
+WEBHOOK_SECRET_TOKEN = os.environ.get("WEBHOOK_SECRET_TOKEN", "spotseekbot123")

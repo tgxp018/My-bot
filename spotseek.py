@@ -25,6 +25,9 @@ async def telegram_webhook(request: Request):
 # --- Startup event to set webhook ---
 @app.on_event("startup")
 async def on_startup():
+    if bot_mode == "polling":
+        print("Polling mode enabled; skipping webhook setup.")
+        return
     # Remove old webhook if any
     await asyncio.sleep(5)
     await bot.remove_webhook()
@@ -37,3 +40,14 @@ async def on_startup():
         secret_token=WEBHOOK_SECRET_TOKEN
     )
     print("Webhook set to:", WEBHOOK_URL)
+
+
+async def run_polling():
+    await bot.remove_webhook()
+    print("Starting polling mode.")
+    await bot.infinity_polling(skip_pending=False)
+
+
+if __name__ == "__main__":
+    if bot_mode == "polling":
+        asyncio.run(run_polling())

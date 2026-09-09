@@ -34,6 +34,7 @@ fi
 
 # Graceful stop by pattern and by port
 pkill -f -TERM "uvicorn.*${APP_MODULE}" 2>/dev/null || true
+pkill -f -TERM "python3.*spotseek.py" 2>/dev/null || true
 fuser -k -TERM "${PORT}/tcp" 2>/dev/null || true
 
 # Wait up to 10s for the port to free
@@ -67,8 +68,21 @@ unset SPOT_SEEK_BOT_API MUSIC_DATABASE_ID LOG_CHANNEL_ID SPOTIFY_APPS_LIST
 # Activate the virtual environment
 source "$SCRIPT_DIR/.venv/bin/activate"
 
-# Run uvicorn in the background using the virtual environment's Python (new process group)
-nohup setsid python3 -m uvicorn "$APP_MODULE" --host "$HOST" --port "$PORT" > /dev/null 2>&1 &
+BOT_MODE=$(python3 - <<'PY'
+import os
+from dotenv import load_dotenv
+load_dotenv('.env')
+print((os.getenv('BOT_MODE') or 'webhook').strip().lower())
+PY
+)
+
+if [ "$BOT_MODE" = "polling" ]; then
+    echo "Starting bot in polling mode..."
+    nohup setsid python3 "$SCRIPT_DIR/spotseek.py" > /dev/null 2>&1 &
+else
+    echo "Starting bot in webhook mode..."
+    nohup setsid python3 -m uvicorn "$APP_MODULE" --host "$HOST" --port "$PORT" > /dev/null 2>&1 &
+fi
 echo $! > "$PID_FILE"
 
-echo "Uvicorn ($APP_MODULE) restarted successfully on $HOST:$PORT."
+echo "SpotSeek restarted successfully in $BOT_MODE mode."
