@@ -26,10 +26,13 @@ $ sudo apt-get upgrade
   - `warp`: I got it as a side feature by installing [MHSanaei 3x-ui](https://github.com/MHSanaei/3x-ui). You might be able to install it via [fscarmen warp](https://github.com/fscarmen/warp) too.
   - install it via `sudo apt-get install proxychains4`
   - set warp proxy in `/etc/proxychains4.conf`
-- copy `.env.example` to `.env` in the repo root and fill in secrets (see `.env.example` for key names). `variables.py` loads that file at import time; existing process environment is not overridden.
-- set required variables in `variables.py` file:
-  - `promote_channel_username` - set to a channel that bot promotes and is its admin (begining with `@`)
-  - `warp_mode` - set to `False` if you don't have warp socks proxy
+- copy `.env.example` to `.env` in the repo root and fill in secrets and self-hosting values (see `.env.example` for key names). `variables.py` loads that file at import time; existing process environment is not overridden.
+- self-hosting values now come from `.env` instead of editing `variables.py`:
+  - `BOT_MODE` - set to `polling` if you do not have a public HTTPS domain, otherwise use `webhook`
+  - `BOT_USERNAME` - your bot username beginning with `@`
+  - `PROMOTE_CHANNEL_USERNAME` - channel that the bot promotes and is admin of
+  - `WEBHOOK_HOST` - your public webhook domain
+  - `DEVELOPER_*` / `SUCCESS_MESSAGE_SPONSOR` - customize public messages and links
 - install `pip`:
 ```
 apt install python3-pip

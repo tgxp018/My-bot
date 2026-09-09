@@ -7,7 +7,8 @@ mutagen
 portalocker
 spotipy
 spotipy-anon
-spotipyfree
+spotipyFree; python_version >= "3.9"
+spotapi<2.0; python_version >= "3.9"
 requests[socks]
 boto3
 telethon

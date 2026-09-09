@@ -129,6 +129,7 @@ def setup_spotdl_executable():
     """Ensure in-repo .venv has pip spotdl + yt-dlp. Does not wget the GitHub ELF or download music."""
     venv_python = os.path.join(spotdl_venv_dir, "bin", "python")
     venv_pip = os.path.join(spotdl_venv_dir, "bin", "pip")
+    pyver = f"{sys.version_info.major}.{sys.version_info.minor}"
 
     try:
         if not os.path.isfile(venv_python):
@@ -145,7 +146,7 @@ def setup_spotdl_executable():
             packages_ok = probe.returncode == 0
 
         if not packages_ok:
-            print("Installing spotdl + yt-dlp into in-repo venv")
+            print(f"Installing spotdl + yt-dlp into in-repo venv for Python {pyver}")
             subprocess.run([venv_pip, "install", "-U", "pip"], check=True)
             if os.path.isfile(spotdl_requirements_file):
                 subprocess.run([venv_pip, "install", "-r", spotdl_requirements_file], check=True)
@@ -154,7 +155,14 @@ def setup_spotdl_executable():
                     [venv_pip, "install", "spotdl", "yt-dlp[default,curl-cffi]"],
                     check=True,
                 )
-        print(f"spotdl ready at {spotdl_bin}")
+        version_probe = subprocess.run(
+            [venv_python, "-c", "import spotdl, yt_dlp; print(spotdl.__version__); print(yt_dlp.version.__version__)"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        spotdl_version, ytdlp_version = version_probe.stdout.strip().splitlines()[:2]
+        print(f"spotdl ready at {spotdl_bin} (spotdl {spotdl_version}, yt-dlp {ytdlp_version})")
     except Exception as e:
         print(f"Failed to ensure spotdl venv: {e}")
         raise

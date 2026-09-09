@@ -1,5 +1,6 @@
 from variables import *
 import re
+import sys
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.cache_handler import MemoryCacheHandler
@@ -108,17 +109,25 @@ def get_playlist_track_ids_via_anon(playlist_id):
         log("spotifyAnon worked fine✅")
         return track_ids
 
+def _load_partner_spotify():
+    """Best-effort import for SpotipyFree / spotapi. Python 3.8 cannot install SpotipyFree."""
+    if sys.version_info < (3, 9):
+        raise RuntimeError("SpotipyFree requires Python 3.9+")
+    from SpotipyFree import Spotify as FreeSpotify
+    from SpotipyFree.Formatter import SpotifyFormatter
+    import spotapi
+    return FreeSpotify, SpotifyFormatter, spotapi
+
 def get_album_track_ids_via_partner(album_id):
     """SpotipyFree album tracks (sync). Official album_tracks can 403 on a stale Spotipy token."""
-    from SpotipyFree import Spotify as FreeSpotify
+    FreeSpotify, _SpotifyFormatter, _spotapi = _load_partner_spotify()
     results = FreeSpotify().album_tracks(album_id)
     items = results["items"] if isinstance(results, dict) else results
     return [t["id"] for t in items if t.get("id")]
 
 def get_playlist_track_ids_via_partner(playlist_id):
     """SpotipyFree / api-partner, sync paginate (playlist_items() breaks inside uvicorn's event loop)."""
-    import spotapi
-    from SpotipyFree.Formatter import SpotifyFormatter
+    _FreeSpotify, SpotifyFormatter, spotapi = _load_partner_spotify()
     track_ids = []
     for chunk in spotapi.PublicPlaylist(playlist_id).paginate_playlist():
         for track in chunk.get("items") or []:
@@ -157,12 +166,22 @@ def get_track_ids(link):
                 tracks = sp.album_tracks(link_id)["items"]
                 track_ids = [t["id"] for t in tracks]
             else:
-                track_ids = get_album_track_ids_via_partner(link_id)
+                try:
+                    track_ids = get_album_track_ids_via_partner(link_id)
+                except Exception as e:
+                    log(f"partner album fetch failed, trying official:\n{e}")
+                    sp = create_spotipy_instance(auth_manager=_spotipy_auth_manager())
+                    tracks = sp.album_tracks(link_id)["items"]
+                    track_ids = [t["id"] for t in tracks]
         else:
             if spotify_auth_mode == "anon":
                 track_ids = get_playlist_track_ids_via_anon(link_id)
             else:
-                track_ids = get_playlist_track_ids_via_partner(link_id)
+                try:
+                    track_ids = get_playlist_track_ids_via_partner(link_id)
+                except Exception as e:
+                    log(f"partner playlist fetch failed, trying official/anon:\n{e}")
+                    track_ids = get_playlist_track_ids_via_anon(link_id)
     except Exception as e:
         log(f"collection fetch failed for {link_type} {link_id}: {e}")
         if cached and cached[0]:
@@ -205,7 +224,7 @@ def _album_name(track):
 
 
 def _search_items_via_partner(query, limit):
-    from SpotipyFree import Spotify as FreeSpotify
+    FreeSpotify, _SpotifyFormatter, _spotapi = _load_partner_spotify()
     results = FreeSpotify().search(query, type="track")
     items = (results.get("tracks") or {}).get("items") or []
     return items[:limit]

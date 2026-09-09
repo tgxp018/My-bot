@@ -6,5 +6,7 @@
 #   .venv/bin/pip install -U pip
 #   .venv/bin/pip install -r requirements-spotdl.txt
 #
-spotdl==4.5.2
-yt-dlp[default,curl-cffi]==2026.8.19
+spotdl==4.2.9; python_version < "3.10"
+yt-dlp[default,curl-cffi]==2024.10.22; python_version < "3.10"
+spotdl==4.5.2; python_version >= "3.10"
+yt-dlp[default,curl-cffi]==2026.8.19; python_version >= "3.10"

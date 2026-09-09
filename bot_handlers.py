@@ -213,7 +213,7 @@ def register_handlers(bot):
             InlineQueryResultCachedAudio(
                 id=track["id"],
                 audio_file_id=track['telegram_audio_id'],
-                caption="@SpotSeekBot"
+                caption=bot_username
             )
             for track in tracks
         ]
